@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="UTF-8">
+    <title></title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <style>
+        #editor {
+            width: calc(100% - 20px);
+            height: calc(100vh - 50px);
+            border: 1px solid #ccc;
+        }
+    </style>
+
+<body>
+    <div id="editor"></div>
+    <script src='https://cdn.jsdelivr.net/npm/monaco-editor@0.22.3/min/vs/loader.js'></script>
+    <script>
+        require.config({
+            paths: {
+                vs: 'https://cdn.jsdelivr.net/npm/monaco-editor@0.22.3/min/vs'
+            },
+            'vs/nls': { availableLanguages: { '*': 'zh-cn' } }
+        });
+
+        //载入Monaco
+        var editor = null;
+        require(['vs/editor/editor.main'], function () {
+            //得到支持的语言
+            var modesIds = monaco.languages.getLanguages().map(function (lang) { return lang.id }).sort();
+
+            //创建编辑器
+            editor = monaco.editor.create(document.getElementById("editor"), {
+                //内容
+                value: 'console.log("Hello world!");',
+                lineNumbers: 'off',
+                //语言
+                language: 'json',
+                //自适应调整
+                automaticLayout: true,
+                //主题，三款：vs、vs-dark、hc-black
+                theme: 'vs',
+                //代码略缩图
+                minimap: {
+                    enabled: false
+                }
+            });
+
+            loadByQueryString()
+        });
+
+        function loadByQueryString() {
+            var encoded = window.location.hash.substring("#src=".length);
+            try {
+                sample = decodeURIComponent(encoded);
+                editor.getModel().setValue(sample);
+
+                setTimeout(function () {
+                    editor.getAction('editor.action.formatDocument')
+                          .run()
+                          .then(() => editor.updateOptions({readOnly: true}))
+
+                }, 1000);
+
+            }
+            catch (e) {
+                console.log("unable to parse #src= uri component");
+                // intentionally fall through to alternatives if decode fails
+            }
+        }
+
+
+
+    </script>
+</body>
+
+</html>
